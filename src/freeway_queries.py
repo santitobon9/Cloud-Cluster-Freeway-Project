@@ -23,7 +23,7 @@ mydb = client[dbname]
 de_collection = mydb["freeway_detectors"]
 lp_collection = mydb["freeway_loopdata"]
 
-# Query 1: count the number of speeds < 5 mph and > 80 mph
+# Query 1: Count the number of speeds < 5 mph and > 80 mph
 result = lp_collection.count_documents(
     {"$or": [{"speed": {"$lt": 5}}, {"speed": {"$gt": 80}}]})
 print("Query 1 count:", result)
@@ -47,3 +47,23 @@ cursor = de_collection.find()
 for record in cursor:
     print(record)
 """
+# Query 3: Find travel time for station Foster NB for 5-Minute intervals for Sept 15, 2011.
+
+result_q3 = mydb["freeway_loopdata"].aggregate([
+    {
+        "$match": {"starttime": {"$regex": '2011-09-15', "$options": 'i'}}
+    },
+    {
+        "$lookup":
+            {"from": "freeway_detectors", "localField": "detectorid",
+                "foreignField": "detectorid", "as": "detector"
+             }
+    },
+    {
+        "$match": {"locationtext": "Foster NB"}
+    }
+])
+
+for record in result_q3:
+    print("hit")
+    print(record)
